@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, User, LogIn, Scale } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,9 +29,14 @@ const Header = ({
   onLogoutClick = () => {},
 }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
   };
 
   return (
@@ -53,25 +58,25 @@ const Header = ({
         <nav className="hidden md:flex items-center space-x-6">
           <Link
             to="/"
-            className="text-white hover:text-gold-300 transition-colors"
+            className={`transition-colors ${isActive("/") ? "text-gold-400 font-medium" : "text-white hover:text-gold-300"}`}
           >
             Home
           </Link>
           <Link
             to="/about"
-            className="text-white hover:text-gold-300 transition-colors"
+            className={`transition-colors ${isActive("/about") ? "text-gold-400 font-medium" : "text-white hover:text-gold-300"}`}
           >
             About
           </Link>
           <Link
             to="/how-it-works"
-            className="text-white hover:text-gold-300 transition-colors"
+            className={`transition-colors ${isActive("/how-it-works") ? "text-gold-400 font-medium" : "text-white hover:text-gold-300"}`}
           >
             How It Works
           </Link>
           <Link
             to="/faq"
-            className="text-white hover:text-gold-300 transition-colors"
+            className={`transition-colors ${isActive("/faq") ? "text-gold-400 font-medium" : "text-white hover:text-gold-300"}`}
           >
             FAQ
           </Link>
@@ -83,7 +88,7 @@ const Header = ({
             <Button
               variant="outline"
               size="sm"
-              className="border-navy-500 hover:bg-navy-700"
+              className={`${isActive("/courtroom") ? "bg-navy-700 border-navy-600" : "border-navy-500 hover:bg-navy-700"}`}
               onClick={() => (window.location.href = "/courtroom")}
             >
               <span className="text-white">Virtual Courtroom</span>
@@ -108,31 +113,38 @@ const Header = ({
           <nav className="flex flex-col space-y-4">
             <Link
               to="/"
-              className="text-white hover:text-gold-300 transition-colors py-2 border-b border-navy-700"
+              className={`transition-colors py-2 border-b border-navy-700 ${isActive("/") ? "text-gold-400 font-medium" : "text-white hover:text-gold-300"}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               to="/about"
-              className="text-white hover:text-gold-300 transition-colors py-2 border-b border-navy-700"
+              className={`transition-colors py-2 border-b border-navy-700 ${isActive("/about") ? "text-gold-400 font-medium" : "text-white hover:text-gold-300"}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
             </Link>
             <Link
               to="/how-it-works"
-              className="text-white hover:text-gold-300 transition-colors py-2 border-b border-navy-700"
+              className={`transition-colors py-2 border-b border-navy-700 ${isActive("/how-it-works") ? "text-gold-400 font-medium" : "text-white hover:text-gold-300"}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               How It Works
             </Link>
             <Link
               to="/faq"
-              className="text-white hover:text-gold-300 transition-colors py-2 border-b border-navy-700"
+              className={`transition-colors py-2 border-b border-navy-700 ${isActive("/faq") ? "text-gold-400 font-medium" : "text-white hover:text-gold-300"}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               FAQ
+            </Link>
+            <Link
+              to="/courtroom"
+              className={`transition-colors py-2 border-b border-navy-700 ${isActive("/courtroom") ? "text-gold-400 font-medium" : "text-white hover:text-gold-300"}`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Virtual Courtroom
             </Link>
             {!isLoggedIn && (
               <div className="flex flex-col space-y-2 pt-2">

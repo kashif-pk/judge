@@ -113,13 +113,26 @@ const VirtualCourtroom = ({
         {
           law: "Indian Penal Code",
           section: "Section 302",
-          description: "Punishment for murder",
+          description:
+            "Punishment for murder - Death or imprisonment for life, and fine",
         },
         {
           law: "Indian Penal Code",
           section: "Section 304",
           description:
-            "Punishment for culpable homicide not amounting to murder",
+            "Punishment for culpable homicide not amounting to murder - Imprisonment up to life, or up to 10 years, and fine",
+        },
+        {
+          law: "Indian Penal Code",
+          section: "Section 307",
+          description:
+            "Attempt to murder - Imprisonment up to 10 years and fine",
+        },
+        {
+          law: "Indian Penal Code",
+          section: "Section 376",
+          description:
+            "Punishment for rape - Rigorous imprisonment from 10 years to life, and fine",
         },
         {
           law: "Code of Criminal Procedure",
@@ -127,14 +140,41 @@ const VirtualCourtroom = ({
           description: "Examination of witnesses by police",
         },
         {
+          law: "Code of Criminal Procedure",
+          section: "Section 164",
+          description: "Recording of confessions and statements by Magistrate",
+        },
+        {
           law: "Indian Evidence Act",
           section: "Section 3",
-          description: "Definition of Evidence",
+          description: "Definition of Evidence - Oral and documentary evidence",
         },
         {
           law: "Indian Evidence Act",
           section: "Section 25",
-          description: "Confession to police officer not to be proved",
+          description:
+            "Confession to police officer not to be proved against accused",
+        },
+        {
+          law: "Indian Evidence Act",
+          section: "Section 45",
+          description: "Opinions of experts - When relevant",
+        },
+        {
+          law: "Indian Evidence Act",
+          section: "Section 65B",
+          description: "Admissibility of electronic records",
+        },
+        {
+          law: "Indian Evidence Act",
+          section: "Section 101",
+          description:
+            "Burden of proof - Whoever desires any Court to give judgment must prove facts",
+        },
+        {
+          law: "Indian Evidence Act",
+          section: "Section 105",
+          description: "Burden of proving exception lies on accused",
         },
       );
     } else if (
@@ -319,6 +359,98 @@ const VirtualCourtroom = ({
     }
   };
 
+  const generateJudgeResponse = (
+    userMessage: Message,
+    caseType: string = "Criminal",
+  ) => {
+    // Check for conflicting precedents or weak arguments that need clarification
+    const needsClarification = checkForClarificationNeeded(
+      userMessage,
+      messages,
+    );
+    if (needsClarification) {
+      return needsClarification;
+    }
+
+    // Case-specific judge responses based on the case type
+    const judgeResponsesByType = {
+      Criminal: [
+        "The Prosecution has cited Section 302 IPC for murder. For a conviction under this section, the evidence must establish both actus reus (the criminal act) and mens rea (criminal intent) beyond reasonable doubt. Please elaborate on how your evidence satisfies these elements as per the standards established in Bachan Singh v. State of Punjab (1980).",
+        "The Defense argues that the confession is inadmissible under Section 25 of the Indian Evidence Act which prohibits confessions made to police officers. However, Section 164 CrPC provides for confessions recorded by a Magistrate which are admissible. Can you clarify whether the confession in this case falls under either provision, citing the procedural safeguards that were followed or violated?",
+        "The " +
+          userRole +
+          " has presented arguments regarding chain of custody of evidence. The Supreme Court in Tomaso Bruno v. State of U.P. (2015) emphasized the importance of proper evidence handling. Please specify the exact procedural violations that would render this evidence inadmissible under Sections 65B and 45 of the Indian Evidence Act.",
+        "Your argument relies on circumstantial evidence. The Supreme Court in Sharad Birdhichand Sarda v. State of Maharashtra (1984) established that circumstantial evidence must form a complete chain with no gaps, must point exclusively toward the guilt of the accused, and must be incapable of explanation by any other hypothesis. How does your evidence satisfy these stringent requirements?",
+        "You've invoked Section 84 IPC regarding unsoundness of mind as a defense. The burden of proving this defense lies with the accused as per Section 105 of the Evidence Act. What specific medical or psychiatric evidence supports this defense, and how does it meet the standards set in Surendra Mishra v. State of Jharkhand (2011) which requires proof of complete impairment of cognitive faculties?",
+      ],
+      Civil: [
+        "Your argument cites breach of contract, but the opposing party claims frustration under Section 56 of the Contract Act. Can you address how the doctrine of frustration does not apply in this specific scenario?",
+        "The documentary evidence you've presented regarding the agreement requires registration under Section 17 of the Registration Act. How do you address the admissibility of this unregistered document?",
+        "The " +
+          userRole +
+          " has raised the issue of specific performance. In light of the Supreme Court's judgment in Adhunik Steels Ltd. v. Orissa Manganese and Minerals Pvt. Ltd., what makes this case appropriate for specific performance rather than damages?",
+        "You've argued about limitation periods for filing this suit. Please address how your claim falls within the prescribed period under the Limitation Act, particularly in reference to when the cause of action arose.",
+        "The opposing counsel has raised the defense of force majeure. In light of Energy Watchdog v. CERC (2017), how do you establish that the circumstances do not qualify as force majeure under Indian contract law?",
+      ],
+      Property: [
+        "Your claim to title is based on a registered sale deed, but the opposing party claims adverse possession for over 12 years. How do you address the requirements of adverse possession as clarified in Ravinder Kaur Grewal v. Manjit Kaur (2019)?",
+        "The property in question appears to be agricultural land. Have you addressed the restrictions on transfer under the relevant state's land ceiling laws and whether proper permission was obtained?",
+        "The " +
+          userRole +
+          " has presented revenue records as evidence of ownership. However, the Supreme Court in Suraj Bhan v. Financial Commissioner has held that revenue records are not conclusive proof of title. How do you strengthen your claim beyond these records?",
+        "You've argued about a boundary dispute based on the property description in the sale deed. How do you reconcile this with the actual physical possession and demarcation on the ground as per the principles in Faqir Chand v. Ram Rattan?",
+        "The opposing party claims that the property transfer lacked proper consideration. Can you address the adequacy of consideration in light of Section 25 of the Transfer of Property Act and relevant case law?",
+      ],
+      Family: [
+        "Your petition for divorce cites cruelty under Section 13(1)(ia) of the Hindu Marriage Act. In light of the Supreme Court's judgment in Samar Ghosh v. Jaya Ghosh, how do the specific instances you've mentioned qualify as legal cruelty?",
+        "The issue of child custody must be decided based on the 'welfare of the child' principle established in Rosy Jacob v. Jacob A. Chakramakkal. How does your claim for custody serve the best interests of the minor children?",
+        "The " +
+          userRole +
+          " has raised the issue of maintenance under Section 125 CrPC. How do you address the quantum of maintenance in light of the guidelines established by the Supreme Court in Rajnesh v. Neha (2020)?",
+        "You've argued about division of matrimonial property. Given that Indian law does not explicitly recognize the concept of community property, what legal basis supports your claim for division of assets acquired during marriage?",
+        "The opposing party claims that the marriage was void ab initio due to non-compliance with essential ceremonies. How do you establish the validity of this marriage under Section 7 of the Hindu Marriage Act?",
+      ],
+      Constitutional: [
+        "Your challenge to the impugned provision is based on Article 14. How does this classification fail the test of reasonable classification established in State of West Bengal v. Anwar Ali Sarkar?",
+        "The state argues that restrictions on the fundamental right are reasonable under Article 19(6). How do you establish that these restrictions fail the proportionality test laid down in Modern Dental College v. State of MP?",
+        "The " +
+          userRole +
+          " has invoked Article 21's right to privacy. In light of Justice K.S. Puttaswamy v. Union of India, how does the impugned action violate the specific facets of privacy identified by the Supreme Court?",
+        "Your argument involves the interpretation of Article 25 regarding religious practices. How do you distinguish between essential and non-essential religious practices as per the test established in The Commissioner, Hindu Religious Endowments v. Sri Lakshmindra Thirtha Swamiar?",
+        "The opposing counsel relies on the doctrine of constitutional silence. How do you address this in light of the basic structure doctrine established in Kesavananda Bharati v. State of Kerala?",
+      ],
+      Corporate: [
+        "Your petition alleges oppression under Section 241 of the Companies Act. In light of Tata Consultancy Services v. Cyrus Investments, what specific actions of the majority shareholders constitute oppression rather than legitimate business decisions?",
+        "The respondents invoke the business judgment rule as a defense. How do you establish that the directors' actions fall outside the protection of this rule as per the standards in Miheer H. Mafatlal v. Mafatlal Industries?",
+        "The " +
+          userRole +
+          " has raised issues regarding corporate governance norms. Can you specify which provisions of the Companies Act or SEBI regulations have been violated and how these violations have caused prejudice?",
+        "You've argued about the validity of board resolutions. How do you address the procedural requirements under Section 179 of the Companies Act and the company's Articles of Association?",
+        "The opposing party claims ratification of the impugned actions by shareholder approval. How do you challenge the validity of this approval in light of the principles established in Foss v. Harbottle and its exceptions?",
+      ],
+      default: [
+        "Thank you for your argument. Could you please elaborate on the legal basis for your claim? Please cite specific sections of the relevant law and Supreme Court precedents that support your position.",
+        "I'd like to clarify a point in your argument. What specific evidence supports your assertion, and how does this evidence meet the standard of proof required in this type of case?",
+        "Both sides have presented arguments on the legal interpretation. Let me ask a specific question to the " +
+          userRole +
+          ": How do you reconcile your interpretation with the contrary precedents cited by the opposing counsel?",
+        "The court would like to understand more about the procedural aspects of your case. Can you address any potential jurisdictional or limitation issues that might affect the admissibility of this matter?",
+        "Your argument raises important questions about the burden of proof. Please clarify which party bears the burden on each contested issue and whether that burden has been discharged based on the evidence presented.",
+        "We are moving toward final arguments in this matter. Please summarize your strongest legal points and the specific relief you are seeking from this court.",
+      ],
+    };
+
+    // Determine which set of responses to use based on case type
+    const caseTypeKey =
+      Object.keys(judgeResponsesByType).find((key) =>
+        caseType.toLowerCase().includes(key.toLowerCase()),
+      ) || "default";
+
+    const responses =
+      judgeResponsesByType[caseTypeKey] || judgeResponsesByType.default;
+    return responses[Math.floor(Math.random() * responses.length)];
+  };
+
   const generateAttachmentAnalysis = (
     attachments: any[],
     caseType: string = "Criminal",
@@ -445,89 +577,6 @@ const VirtualCourtroom = ({
     });
 
     return analyses.join("\n");
-  };
-
-  const generateJudgeResponse = (
-    userMessage: Message,
-    caseType: string = "Criminal",
-  ) => {
-    // Case-specific judge responses based on the case type
-    const judgeResponsesByType = {
-      Criminal: [
-        "The Prosecution has cited Section 302 IPC for murder. However, does the presented evidence establish mens rea (criminal intent) beyond a reasonable doubt? Please clarify with specific evidence.",
-        "The Defense argues that the confession is inadmissible under Section 25 of the Indian Evidence Act. However, confessions made before a magistrate under Section 164 CrPC may be admissible. How do you address this legal distinction?",
-        "The " +
-          userRole +
-          " has presented arguments regarding chain of custody of evidence. Can you cite the specific procedural violations that would render this evidence inadmissible under Indian Evidence Act?",
-        "Your argument references circumstantial evidence. The Supreme Court in Sharad Birdhichand Sarda v. State of Maharashtra established specific criteria for circumstantial evidence. How does your evidence meet these standards?",
-        "You've argued about the applicability of Section 84 IPC regarding unsoundness of mind. What medical or expert evidence supports this defense in light of the standards set in Surendra Mishra v. State of Jharkhand?",
-      ],
-      Civil: [
-        "Your argument cites breach of contract, but the opposing party claims frustration under Section 56 of the Contract Act. Can you address how the doctrine of frustration does not apply in this specific scenario?",
-        "The documentary evidence you've presented regarding the agreement requires registration under Section 17 of the Registration Act. How do you address the admissibility of this unregistered document?",
-        "The " +
-          userRole +
-          " has raised the issue of specific performance. In light of the Supreme Court's judgment in Adhunik Steels Ltd. v. Orissa Manganese and Minerals Pvt. Ltd., what makes this case appropriate for specific performance rather than damages?",
-        "You've argued about limitation periods for filing this suit. Please address how your claim falls within the prescribed period under the Limitation Act, particularly in reference to when the cause of action arose.",
-        "The opposing counsel has raised the defense of force majeure. In light of Energy Watchdog v. CERC (2017), how do you establish that the circumstances do not qualify as force majeure under Indian contract law?",
-      ],
-      Property: [
-        "Your claim to title is based on a registered sale deed, but the opposing party claims adverse possession for over 12 years. How do you address the requirements of adverse possession as clarified in Ravinder Kaur Grewal v. Manjit Kaur (2019)?",
-        "The property in question appears to be agricultural land. Have you addressed the restrictions on transfer under the relevant state's land ceiling laws and whether proper permission was obtained?",
-        "The " +
-          userRole +
-          " has presented revenue records as evidence of ownership. However, the Supreme Court in Suraj Bhan v. Financial Commissioner has held that revenue records are not conclusive proof of title. How do you strengthen your claim beyond these records?",
-        "You've argued about a boundary dispute based on the property description in the sale deed. How do you reconcile this with the actual physical possession and demarcation on the ground as per the principles in Faqir Chand v. Ram Rattan?",
-        "The opposing party claims that the property transfer lacked proper consideration. Can you address the adequacy of consideration in light of Section 25 of the Transfer of Property Act and relevant case law?",
-      ],
-      Family: [
-        "Your petition for divorce cites cruelty under Section 13(1)(ia) of the Hindu Marriage Act. In light of the Supreme Court's judgment in Samar Ghosh v. Jaya Ghosh, how do the specific instances you've mentioned qualify as legal cruelty?",
-        "The issue of child custody must be decided based on the 'welfare of the child' principle established in Rosy Jacob v. Jacob A. Chakramakkal. How does your claim for custody serve the best interests of the minor children?",
-        "The " +
-          userRole +
-          " has raised the issue of maintenance under Section 125 CrPC. How do you address the quantum of maintenance in light of the guidelines established by the Supreme Court in Rajnesh v. Neha (2020)?",
-        "You've argued about division of matrimonial property. Given that Indian law does not explicitly recognize the concept of community property, what legal basis supports your claim for division of assets acquired during marriage?",
-        "The opposing party claims that the marriage was void ab initio due to non-compliance with essential ceremonies. How do you establish the validity of this marriage under Section 7 of the Hindu Marriage Act?",
-      ],
-      Constitutional: [
-        "Your challenge to the impugned provision is based on Article 14. How does this classification fail the test of reasonable classification established in State of West Bengal v. Anwar Ali Sarkar?",
-        "The state argues that restrictions on the fundamental right are reasonable under Article 19(6). How do you establish that these restrictions fail the proportionality test laid down in Modern Dental College v. State of MP?",
-        "The " +
-          userRole +
-          " has invoked Article 21's right to privacy. In light of Justice K.S. Puttaswamy v. Union of India, how does the impugned action violate the specific facets of privacy identified by the Supreme Court?",
-        "Your argument involves the interpretation of Article 25 regarding religious practices. How do you distinguish between essential and non-essential religious practices as per the test established in The Commissioner, Hindu Religious Endowments v. Sri Lakshmindra Thirtha Swamiar?",
-        "The opposing counsel relies on the doctrine of constitutional silence. How do you address this in light of the basic structure doctrine established in Kesavananda Bharati v. State of Kerala?",
-      ],
-      Corporate: [
-        "Your petition alleges oppression under Section 241 of the Companies Act. In light of Tata Consultancy Services v. Cyrus Investments, what specific actions of the majority shareholders constitute oppression rather than legitimate business decisions?",
-        "The respondents invoke the business judgment rule as a defense. How do you establish that the directors' actions fall outside the protection of this rule as per the standards in Miheer H. Mafatlal v. Mafatlal Industries?",
-        "The " +
-          userRole +
-          " has raised issues regarding corporate governance norms. Can you specify which provisions of the Companies Act or SEBI regulations have been violated and how these violations have caused prejudice?",
-        "You've argued about the validity of board resolutions. How do you address the procedural requirements under Section 179 of the Companies Act and the company's Articles of Association?",
-        "The opposing party claims ratification of the impugned actions by shareholder approval. How do you challenge the validity of this approval in light of the principles established in Foss v. Harbottle and its exceptions?",
-      ],
-      default: [
-        "Thank you for your argument. Could you please elaborate on the legal basis for your claim? Please cite specific sections of the relevant law and Supreme Court precedents that support your position.",
-        "I'd like to clarify a point in your argument. What specific evidence supports your assertion, and how does this evidence meet the standard of proof required in this type of case?",
-        "Both sides have presented arguments on the legal interpretation. Let me ask a specific question to the " +
-          userRole +
-          ": How do you reconcile your interpretation with the contrary precedents cited by the opposing counsel?",
-        "The court would like to understand more about the procedural aspects of your case. Can you address any potential jurisdictional or limitation issues that might affect the admissibility of this matter?",
-        "Your argument raises important questions about the burden of proof. Please clarify which party bears the burden on each contested issue and whether that burden has been discharged based on the evidence presented.",
-        "We are moving toward final arguments in this matter. Please summarize your strongest legal points and the specific relief you are seeking from this court.",
-      ],
-    };
-
-    // Determine which set of responses to use based on case type
-    const caseTypeKey =
-      Object.keys(judgeResponsesByType).find((key) =>
-        caseType.toLowerCase().includes(key.toLowerCase()),
-      ) || "default";
-
-    const responses =
-      judgeResponsesByType[caseTypeKey] || judgeResponsesByType.default;
-    return responses[Math.floor(Math.random() * responses.length)];
   };
 
   const generateOpposingResponse = (
@@ -668,13 +717,110 @@ const VirtualCourtroom = ({
     // Randomly decide whether to include citations
     if (Math.random() > 0.7 || legalReferences.length === 0) return undefined;
 
-    // Select 1-2 random citations from the legal references
-    const numCitations = Math.floor(Math.random() * 2) + 1;
+    // Additional criminal law citations for more accurate legal references
+    const criminalCitations = [
+      {
+        law: "Indian Penal Code",
+        section: "Section 302",
+        description:
+          "Punishment for murder - Death or imprisonment for life, and fine",
+      },
+      {
+        law: "Indian Penal Code",
+        section: "Section 304",
+        description:
+          "Punishment for culpable homicide not amounting to murder - Imprisonment up to life, or up to 10 years, and fine",
+      },
+      {
+        law: "Indian Penal Code",
+        section: "Section 307",
+        description: "Attempt to murder - Imprisonment up to 10 years and fine",
+      },
+      {
+        law: "Indian Penal Code",
+        section: "Section 376",
+        description:
+          "Punishment for rape - Rigorous imprisonment from 10 years to life, and fine",
+      },
+      {
+        law: "Indian Evidence Act",
+        section: "Section 3",
+        description: "Definition of Evidence - Oral and documentary evidence",
+      },
+      {
+        law: "Indian Evidence Act",
+        section: "Section 25",
+        description:
+          "Confession to police officer not to be proved against accused",
+      },
+      {
+        law: "Indian Evidence Act",
+        section: "Section 45",
+        description: "Opinions of experts - When relevant",
+      },
+      {
+        law: "Indian Evidence Act",
+        section: "Section 101",
+        description:
+          "Burden of proof - Whoever desires any Court to give judgment must prove facts",
+      },
+      {
+        law: "Code of Criminal Procedure",
+        section: "Section 164",
+        description: "Recording of confessions and statements by Magistrate",
+      },
+    ];
+
+    // Select 2-3 citations, with preference for appropriate criminal law citations if applicable
+    const numCitations = Math.floor(Math.random() * 2) + 2; // 2-3 citations
     const citations = [];
 
-    for (let i = 0; i < numCitations && i < legalReferences.length; i++) {
+    // If it's a criminal case, include at least one appropriate criminal citation
+    if (caseType.toLowerCase().includes("criminal")) {
+      // Check message content to determine appropriate citations
+      const messageContent = messages
+        .map((m) => m.content.toLowerCase())
+        .join(" ");
+
+      if (messageContent.includes("murder")) {
+        citations.push(criminalCitations[0]); // Section 302 IPC
+      } else if (messageContent.includes("culpable homicide")) {
+        citations.push(criminalCitations[1]); // Section 304 IPC
+      } else if (messageContent.includes("attempt to murder")) {
+        citations.push(criminalCitations[2]); // Section 307 IPC
+      } else if (messageContent.includes("rape")) {
+        citations.push(criminalCitations[3]); // Section 376 IPC
+      }
+
+      // Add evidence-related citations if relevant
+      if (messageContent.includes("confession")) {
+        citations.push(criminalCitations[5]); // Section 25 of Evidence Act
+        citations.push(criminalCitations[8]); // Section 164 CrPC
+      }
+      if (
+        messageContent.includes("expert") ||
+        messageContent.includes("forensic")
+      ) {
+        citations.push(criminalCitations[6]); // Section 45 of Evidence Act
+      }
+
+      // Always include burden of proof citation for criminal cases
+      citations.push(criminalCitations[7]); // Section 101 of Evidence Act
+    }
+
+    // Fill remaining citations from legal references
+    while (citations.length < numCitations && legalReferences.length > 0) {
       const randomIndex = Math.floor(Math.random() * legalReferences.length);
-      citations.push(legalReferences[randomIndex]);
+      const citation = legalReferences[randomIndex];
+
+      // Check if this citation is already included
+      if (
+        !citations.some(
+          (c) => c.section === citation.section && c.law === citation.law,
+        )
+      ) {
+        citations.push(citation);
+      }
     }
 
     return citations;
@@ -683,214 +829,361 @@ const VirtualCourtroom = ({
   const deliverJudgment = () => {
     setJudgmentInProgress(true);
 
-    // Generate case-specific judgment based on case type
+    // Add a deliberation phase before final judgment
     setTimeout(() => {
-      // Analyze the conversation to determine the strength of each side's arguments
-      const prosecutionMessages = messages.filter(
-        (m) => m.role === "prosecution",
-      );
-      const defenseMessages = messages.filter((m) => m.role === "defense");
-
-      // Count citations and evidence mentions as a simple heuristic for argument strength
-      const prosecutionStrength =
-        calculateArgumentStrength(prosecutionMessages);
-      const defenseStrength = calculateArgumentStrength(defenseMessages);
-
-      // Determine verdict based on argument strength with some randomness
-      // This creates a weighted probability based on argument strength
-      const prosecutionProbability =
-        prosecutionStrength / (prosecutionStrength + defenseStrength);
-      const isGuilty = Math.random() < prosecutionProbability;
-
-      // Generate case-specific judgment content
-      let verdict, reasoning, sentencing;
-
-      if (caseType.toLowerCase().includes("criminal")) {
-        verdict = isGuilty ? "Guilty" : "Not Guilty";
-
-        if (isGuilty) {
-          reasoning =
-            "After careful consideration of all arguments and evidence presented in this criminal case, the Court finds that the prosecution has established the guilt of the accused beyond reasonable doubt. The evidence presented, particularly regarding " +
-            getRandomEvidencePoint() +
-            ", is compelling and meets the standard required under Indian criminal jurisprudence. The defense's arguments regarding " +
-            getRandomDefenseArgument() +
-            " were considered but found insufficient to create reasonable doubt in light of the totality of evidence.";
-
-          // Different sentencing based on the specific criminal case context
-          const sentences = [
-            "The accused is sentenced to imprisonment for a term of 5 years and a fine of ₹10,000 under Section 302 of the IPC.",
-            "The accused is sentenced to rigorous imprisonment for 7 years and a fine of ₹25,000 under Section 376 of the IPC.",
-            "The accused is sentenced to imprisonment for 3 years and a fine of ₹5,000 under Section 420 of the IPC.",
-          ];
-          sentencing = sentences[Math.floor(Math.random() * sentences.length)];
-        } else {
-          reasoning =
-            "After careful examination of all arguments and evidence presented in this criminal case, the Court finds that the prosecution has failed to establish the guilt of the accused beyond reasonable doubt. The defense successfully raised significant doubts regarding " +
-            getRandomDefenseArgument() +
-            ", and the prosecution's evidence concerning " +
-            getRandomEvidencePoint() +
-            " was found to be insufficient or inconclusive. In a criminal trial, the benefit of doubt must go to the accused.";
-          sentencing = null;
-        }
-      } else if (caseType.toLowerCase().includes("civil")) {
-        verdict = isGuilty ? "Claim Upheld" : "Claim Dismissed";
-
-        if (isGuilty) {
-          reasoning =
-            "After evaluating the evidence and arguments presented in this civil matter, the Court finds in favor of the plaintiff. The plaintiff has successfully established their claim on a preponderance of probabilities. The documentary evidence regarding " +
-            getRandomEvidencePoint() +
-            " clearly supports the plaintiff's position, and the defendant's arguments concerning " +
-            getRandomDefenseArgument() +
-            " were not sufficiently substantiated.";
-          sentencing =
-            "The defendant is directed to pay damages of ₹5,00,000 to the plaintiff along with interest at 6% per annum from the date of filing till realization.";
-        } else {
-          reasoning =
-            "After evaluating the evidence and arguments presented in this civil matter, the Court finds in favor of the defendant. The plaintiff has failed to establish their claim on a preponderance of probabilities. The defendant's arguments regarding " +
-            getRandomDefenseArgument() +
-            " were found to be legally sound, and the plaintiff's evidence concerning " +
-            getRandomEvidencePoint() +
-            " was insufficient to support their claim.";
-          sentencing = null;
-        }
-      } else if (caseType.toLowerCase().includes("property")) {
-        verdict = isGuilty ? "Title Confirmed" : "Claim Rejected";
-
-        if (isGuilty) {
-          reasoning =
-            "After examining the documentary evidence and arguments presented in this property dispute, the Court confirms the plaintiff's title to the property in question. The sale deed, revenue records, and other documents clearly establish the plaintiff's ownership rights. The defendant's claim of " +
-            getRandomDefenseArgument() +
-            " was not supported by sufficient evidence or legal basis.";
-          sentencing =
-            "The defendant is directed to vacate the property within 30 days and pay mesne profits at the rate of ₹10,000 per month for the period of unauthorized occupation.";
-        } else {
-          reasoning =
-            "After examining the documentary evidence and arguments presented in this property dispute, the Court rejects the plaintiff's claim to the property in question. The defendant has successfully established " +
-            getRandomDefenseArgument() +
-            ", which defeats the plaintiff's claim. The plaintiff's reliance on " +
-            getRandomEvidencePoint() +
-            " was found to be legally insufficient to establish title.";
-          sentencing = null;
-        }
-      } else if (caseType.toLowerCase().includes("family")) {
-        verdict = isGuilty ? "Petition Granted" : "Petition Dismissed";
-
-        if (isGuilty) {
-          reasoning =
-            "After considering the evidence and arguments presented in this family matter, the Court grants the petitioner's prayer. The petitioner has successfully established grounds under the relevant family law statutes. The evidence regarding " +
-            getRandomEvidencePoint() +
-            " was found to be credible and sufficient, while the respondent's contentions about " +
-            getRandomDefenseArgument() +
-            " were not adequately substantiated.";
-          sentencing =
-            "The marriage between the parties is hereby dissolved. The petitioner is granted custody of the minor children with visitation rights to the respondent. The respondent shall pay maintenance of ₹25,000 per month.";
-        } else {
-          reasoning =
-            "After considering the evidence and arguments presented in this family matter, the Court dismisses the petitioner's prayer. The petitioner has failed to establish sufficient grounds under the relevant family law statutes. The respondent's arguments regarding " +
-            getRandomDefenseArgument() +
-            " were found to be credible, and the petitioner's evidence concerning " +
-            getRandomEvidencePoint() +
-            " was insufficient or inconsistent.";
-          sentencing = null;
-        }
-      } else if (caseType.toLowerCase().includes("constitutional")) {
-        verdict = isGuilty
-          ? "Provision Unconstitutional"
-          : "Provision Constitutional";
-
-        if (isGuilty) {
-          reasoning =
-            "After a thorough analysis of the constitutional questions raised in this matter, the Court finds that the impugned provision violates the fundamental rights guaranteed under the Constitution of India. The petitioner has successfully demonstrated that the provision fails the test of reasonable classification under Article 14 and imposes unreasonable restrictions on fundamental rights. The state's justification regarding " +
-            getRandomDefenseArgument() +
-            " does not satisfy the proportionality standard established by the Supreme Court.";
-          sentencing =
-            "The impugned provision is hereby declared unconstitutional and struck down. The state is directed to frame new guidelines in accordance with constitutional principles within 6 months.";
-        } else {
-          reasoning =
-            "After a thorough analysis of the constitutional questions raised in this matter, the Court finds that the impugned provision does not violate the fundamental rights guaranteed under the Constitution of India. The state has successfully demonstrated that the provision creates a reasonable classification with a rational nexus to the object sought to be achieved. The petitioner's arguments regarding " +
-            getRandomEvidencePoint() +
-            " do not establish any violation of constitutional principles.";
-          sentencing = null;
-        }
-      } else if (caseType.toLowerCase().includes("corporate")) {
-        verdict = isGuilty ? "Petition Allowed" : "Petition Dismissed";
-
-        if (isGuilty) {
-          reasoning =
-            "After examining the corporate governance issues raised in this matter, the Court finds in favor of the petitioner. The evidence clearly establishes violations of the Companies Act provisions regarding directors' duties and shareholder rights. The respondents' actions concerning " +
-            getRandomEvidencePoint() +
-            " constitute oppression and mismanagement, and their business judgment defense regarding " +
-            getRandomDefenseArgument() +
-            " is not sustainable in light of the evidence presented.";
-          sentencing =
-            "The respondents are directed to buy out the petitioner's shares at fair market value as determined by an independent valuer. The respondents shall also pay costs of ₹5,00,000 to the petitioner.";
-        } else {
-          reasoning =
-            "After examining the corporate governance issues raised in this matter, the Court finds in favor of the respondents. The petitioner has failed to establish any violation of the Companies Act provisions or oppression and mismanagement. The respondents' business judgment regarding " +
-            getRandomDefenseArgument() +
-            " appears to have been exercised in good faith and in the best interest of the company. The petitioner's allegations concerning " +
-            getRandomEvidencePoint() +
-            " were not substantiated by sufficient evidence.";
-          sentencing = null;
-        }
-      } else {
-        // Default judgment for other case types
-        verdict = isGuilty ? "In Favor of Plaintiff" : "In Favor of Defendant";
-        reasoning =
-          "After careful consideration of all arguments and evidence presented by both sides, and applying the relevant legal principles and precedents, the court has reached its decision. The " +
-          (isGuilty ? "plaintiff's" : "defendant's") +
-          " arguments were found to be more compelling and legally sound.";
-        sentencing = isGuilty
-          ? "The defendant is directed to comply with the plaintiff's demands and pay the costs of the proceedings."
-          : null;
-      }
-
-      const judgmentResult = {
-        verdict: verdict,
-        reasoning: reasoning,
-        applicableLaws: legalReferences.slice(0, 3),
-        sentencing: sentencing,
-        recommendations:
-          "The court recommends that both parties consider the option of appeal if they find this judgment unsatisfactory.",
-      };
-
-      setJudgment(judgmentResult);
-      setIsCaseActive(false);
-      setJudgmentInProgress(false);
-
-      // Add judgment to messages
-      const judgmentMessage: Message = {
-        id: "judgment-" + Date.now().toString(),
+      // Show deliberation message
+      const deliberationMessage: Message = {
+        id: "judge-deliberation-" + Date.now().toString(),
         role: "judge",
         content:
-          "**JUDGMENT**\n\n" +
-          judgmentResult.reasoning +
-          "\n\nVerdict: " +
-          judgmentResult.verdict +
-          "\n\n" +
-          (judgmentResult.sentencing
-            ? "Sentencing: " + judgmentResult.sentencing + "\n\n"
-            : "") +
-          judgmentResult.recommendations,
+          "The Court will now deliberate on all arguments and evidence presented. The AI Judge is reviewing relevant legal precedents, assessing the credibility of evidence, and evaluating the strength of legal arguments from both sides before delivering the final judgment.",
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, judgmentMessage]);
-    }, 5000);
+      setMessages((prev) => [...prev, deliberationMessage]);
+
+      // Conduct bias and consistency check
+      const biasCheckResult = conductBiasCheck(messages);
+
+      // Generate case-specific judgment based on case type after deliberation
+      setTimeout(() => {
+        // Analyze the conversation to determine the strength of each side's arguments
+        const prosecutionMessages = messages.filter(
+          (m) => m.role === "prosecution",
+        );
+        const defenseMessages = messages.filter((m) => m.role === "defense");
+
+        // Count citations and evidence mentions as a simple heuristic for argument strength
+        const prosecutionStrength =
+          calculateArgumentStrength(prosecutionMessages);
+        const defenseStrength = calculateArgumentStrength(defenseMessages);
+
+        // Determine verdict based on argument strength with some randomness
+        // This creates a weighted probability based on argument strength
+        const prosecutionProbability =
+          prosecutionStrength / (prosecutionStrength + defenseStrength);
+        const isGuilty = Math.random() < prosecutionProbability;
+
+        // Generate case-specific judgment content
+        let verdict, reasoning, sentencing, postVerdictConsiderations;
+
+        if (caseType.toLowerCase().includes("criminal")) {
+          verdict = isGuilty ? "Guilty" : "Not Guilty";
+
+          // Analyze key arguments from both sides for comprehensive judgment reasoning
+          const prosecutionKeyPoints =
+            getKeyArgumentPoints(prosecutionMessages);
+          const defenseKeyPoints = getKeyArgumentPoints(defenseMessages);
+
+          // Check for procedural violations that might affect the case
+          const procedureViolations = checkForProceduralViolations(messages);
+          const hasProcedureViolations = procedureViolations.length > 0;
+
+          if (isGuilty) {
+            // Identify aggravating and mitigating factors for sentencing
+            const aggravatingFactors = identifyAggravatingFactors(messages);
+            const mitigatingFactors = identifyMitigatingFactors(messages);
+
+            reasoning =
+              "**COMPREHENSIVE JUDGMENT ANALYSIS**\n\n" +
+              "After meticulous examination of all arguments and evidence presented in this criminal case, the Court finds that the prosecution has established the guilt of the accused beyond reasonable doubt as required under Section 101 of the Indian Evidence Act.\n\n" +
+              "**Key Prosecution Arguments:**\n" +
+              prosecutionKeyPoints +
+              "\n\n" +
+              "**Key Defense Arguments:**\n" +
+              defenseKeyPoints +
+              "\n\n" +
+              "**Court's Analysis:**\n" +
+              "The evidence presented, particularly regarding " +
+              getRandomEvidencePoint() +
+              ", is compelling and forms a complete chain of circumstances that points exclusively to the guilt of the accused, satisfying the criteria established in Sharad Birdhichand Sarda v. State of Maharashtra (1984). The Court has carefully considered the defense's arguments regarding " +
+              getRandomDefenseArgument() +
+              " but finds them insufficient to create reasonable doubt when evaluated against the totality of evidence." +
+              (hasProcedureViolations
+                ? "\n\nThe Court notes the following procedural concerns raised during the proceedings: " +
+                  procedureViolations +
+                  ". However, these issues do not materially impact the reliability of the core evidence establishing guilt."
+                : "") +
+              "\n\nThe prosecution has successfully established both actus reus (criminal act) and mens rea (criminal intent) required for the offense.";
+
+            // Appropriate sentencing based on the specific criminal case context with consideration of aggravating/mitigating factors
+            const messageContent = messages
+              .map((m) => m.content.toLowerCase())
+              .join(" ");
+
+            // Murder case sentencing
+            if (
+              messageContent.includes("murder") ||
+              messageContent.includes("section 302")
+            ) {
+              // Consider death penalty for premeditated murder with aggravating factors
+              if (
+                aggravatingFactors.includes("premeditation") &&
+                aggravatingFactors.length > 2 &&
+                mitigatingFactors.length === 0
+              ) {
+                sentencing =
+                  "After considering both aggravating factors (" +
+                  aggravatingFactors.join(", ") +
+                  ") and the absence of significant mitigating circumstances, the Court finds this case falls within the 'rarest of rare' category. The accused is sentenced to death under Section 302 of the IPC, following the principles established in Bachan Singh v. State of Punjab (1980) and Machhi Singh v. State of Punjab (1983).";
+              }
+              // Life imprisonment for murder with some mitigating factors
+              else if (mitigatingFactors.length > 0) {
+                sentencing =
+                  "The accused is sentenced to imprisonment for life and a fine of ₹75,000 under Section 302 of the IPC. While the Court acknowledges the aggravating factors (" +
+                  aggravatingFactors.join(", ") +
+                  "), it has also considered mitigating circumstances (" +
+                  mitigatingFactors.join(", ") +
+                  ") as outlined in Santosh Kumar Bariyar v. State of Maharashtra (2009).";
+              }
+              // Standard life imprisonment for murder
+              else {
+                sentencing =
+                  "The accused is sentenced to imprisonment for life and a fine of ₹100,000 under Section 302 of the IPC. The Court has considered the heinous nature of the crime and the principles established in Bachan Singh v. State of Punjab (1980) regarding sentencing in murder cases.";
+              }
+            }
+            // Culpable homicide sentencing
+            else if (
+              messageContent.includes("culpable homicide") ||
+              messageContent.includes("section 304")
+            ) {
+              sentencing =
+                "The accused is sentenced to imprisonment for 10 years and a fine of ₹50,000 under Section 304 of the IPC (Culpable homicide not amounting to murder). The Court has considered that while the accused caused death, the circumstances fall short of murder as defined under Section 300 IPC.";
+            }
+            // Rape sentencing
+            else if (
+              messageContent.includes("rape") ||
+              messageContent.includes("section 376")
+            ) {
+              sentencing =
+                "The accused is sentenced to rigorous imprisonment for 20 years and a fine of ₹200,000 under Section 376 of the IPC (Punishment for Rape), with the fine amount to be paid as compensation to the victim as per Section 357 CrPC. The Court has considered the trauma inflicted on the victim and the need for deterrence as outlined in Mukesh & Anr. v. State (NCT of Delhi) (2017).";
+            }
+            // Default criminal sentencing
+            else {
+              sentencing =
+                "The accused is sentenced to rigorous imprisonment for 7 years and a fine of ₹50,000 under the applicable sections of the IPC. The Court has balanced the gravity of the offense with proportionate punishment.";
+            }
+
+            // Add post-verdict considerations
+            postVerdictConsiderations =
+              "The accused has the right to appeal this conviction and sentence before the High Court within 90 days as per Section 374 of the CrPC. If new evidence emerges that was not available during trial, a review petition may be considered under appropriate provisions.";
+          } else {
+            reasoning =
+              "**COMPREHENSIVE JUDGMENT ANALYSIS**\n\n" +
+              "After thorough examination of all arguments and evidence presented in this criminal case, the Court finds that the prosecution has failed to establish the guilt of the accused beyond reasonable doubt as required by Section 101 of the Indian Evidence Act and affirmed in K. Venkateshwarlu v. State of Andhra Pradesh (2012).\n\n" +
+              "**Key Prosecution Arguments:**\n" +
+              prosecutionKeyPoints +
+              "\n\n" +
+              "**Key Defense Arguments:**\n" +
+              defenseKeyPoints +
+              "\n\n" +
+              "**Court's Analysis:**\n" +
+              "The defense has successfully raised significant doubts regarding " +
+              getRandomDefenseArgument() +
+              ", which the prosecution has failed to address adequately. Furthermore, the prosecution's evidence concerning " +
+              getRandomEvidencePoint() +
+              " was found to be insufficient, inconclusive, or inadmissible under the relevant provisions of the Indian Evidence Act." +
+              (hasProcedureViolations
+                ? "\n\nThe Court notes with concern the following procedural violations: " +
+                  procedureViolations +
+                  ". These irregularities have significantly impacted the admissibility and reliability of key prosecution evidence."
+                : "") +
+              "\n\nThe Court is guided by the cardinal principle of criminal jurisprudence that the benefit of doubt must go to the accused, as established in Kali Ram v. State of Himachal Pradesh (1973). The prosecution bears the burden of proving every ingredient of the offense beyond reasonable doubt, and in this case, that burden has not been discharged.";
+
+            sentencing = null;
+
+            // Add post-verdict considerations
+            postVerdictConsiderations =
+              "The prosecution has the right to appeal this acquittal before the High Court within the statutory period as per Section 378 of the CrPC. The accused is entitled to be released forthwith if not required in any other case.";
+          }
+        } else if (caseType.toLowerCase().includes("civil")) {
+          verdict = isGuilty ? "Claim Upheld" : "Claim Dismissed";
+
+          if (isGuilty) {
+            reasoning =
+              "After evaluating the evidence and arguments presented in this civil matter, the Court finds in favor of the plaintiff. The plaintiff has successfully established their claim on a preponderance of probabilities. The documentary evidence regarding " +
+              getRandomEvidencePoint() +
+              " clearly supports the plaintiff's position, and the defendant's arguments concerning " +
+              getRandomDefenseArgument() +
+              " were not sufficiently substantiated.";
+            sentencing =
+              "The defendant is directed to pay damages of ₹5,00,000 to the plaintiff along with interest at 6% per annum from the date of filing till realization.";
+          } else {
+            reasoning =
+              "After evaluating the evidence and arguments presented in this civil matter, the Court finds in favor of the defendant. The plaintiff has failed to establish their claim on a preponderance of probabilities. The defendant's arguments regarding " +
+              getRandomDefenseArgument() +
+              " were found to be legally sound, and the plaintiff's evidence concerning " +
+              getRandomEvidencePoint() +
+              " was insufficient to support their claim.";
+            sentencing = null;
+          }
+        } else if (caseType.toLowerCase().includes("property")) {
+          verdict = isGuilty ? "Title Confirmed" : "Claim Rejected";
+
+          if (isGuilty) {
+            reasoning =
+              "After examining the documentary evidence and arguments presented in this property dispute, the Court confirms the plaintiff's title to the property in question. The sale deed, revenue records, and other documents clearly establish the plaintiff's ownership rights. The defendant's claim of " +
+              getRandomDefenseArgument() +
+              " was not supported by sufficient evidence or legal basis.";
+            sentencing =
+              "The defendant is directed to vacate the property within 30 days and pay mesne profits at the rate of ₹10,000 per month for the period of unauthorized occupation.";
+          } else {
+            reasoning =
+              "After examining the documentary evidence and arguments presented in this property dispute, the Court rejects the plaintiff's claim to the property in question. The defendant has successfully established " +
+              getRandomDefenseArgument() +
+              ", which defeats the plaintiff's claim. The plaintiff's reliance on " +
+              getRandomEvidencePoint() +
+              " was found to be legally insufficient to establish title.";
+            sentencing = null;
+          }
+        } else if (caseType.toLowerCase().includes("family")) {
+          verdict = isGuilty ? "Petition Granted" : "Petition Dismissed";
+
+          if (isGuilty) {
+            reasoning =
+              "After considering the evidence and arguments presented in this family matter, the Court grants the petitioner's prayer. The petitioner has successfully established grounds under the relevant family law statutes. The evidence regarding " +
+              getRandomEvidencePoint() +
+              " was found to be credible and sufficient, while the respondent's contentions about " +
+              getRandomDefenseArgument() +
+              " were not adequately substantiated.";
+            sentencing =
+              "The marriage between the parties is hereby dissolved. The petitioner is granted custody of the minor children with visitation rights to the respondent. The respondent shall pay maintenance of ₹25,000 per month.";
+          } else {
+            reasoning =
+              "After considering the evidence and arguments presented in this family matter, the Court dismisses the petitioner's prayer. The petitioner has failed to establish sufficient grounds under the relevant family law statutes. The respondent's arguments regarding " +
+              getRandomDefenseArgument() +
+              " were found to be credible, and the petitioner's evidence concerning " +
+              getRandomEvidencePoint() +
+              " was insufficient or inconsistent.";
+            sentencing = null;
+          }
+        } else if (caseType.toLowerCase().includes("constitutional")) {
+          verdict = isGuilty
+            ? "Provision Unconstitutional"
+            : "Provision Constitutional";
+
+          if (isGuilty) {
+            reasoning =
+              "After a thorough analysis of the constitutional questions raised in this matter, the Court finds that the impugned provision violates the fundamental rights guaranteed under the Constitution of India. The petitioner has successfully demonstrated that the provision fails the test of reasonable classification under Article 14 and imposes unreasonable restrictions on fundamental rights. The state's justification regarding " +
+              getRandomDefenseArgument() +
+              " does not satisfy the proportionality standard established by the Supreme Court.";
+            sentencing =
+              "The impugned provision is hereby declared unconstitutional and struck down. The state is directed to frame new guidelines in accordance with constitutional principles within 6 months.";
+          } else {
+            reasoning =
+              "After a thorough analysis of the constitutional questions raised in this matter, the Court finds that the impugned provision does not violate the fundamental rights guaranteed under the Constitution of India. The state has successfully demonstrated that the provision creates a reasonable classification with a rational nexus to the object sought to be achieved. The petitioner's arguments regarding " +
+              getRandomEvidencePoint() +
+              " do not establish any violation of constitutional principles.";
+            sentencing = null;
+          }
+        } else if (caseType.toLowerCase().includes("corporate")) {
+          verdict = isGuilty ? "Petition Allowed" : "Petition Dismissed";
+
+          if (isGuilty) {
+            reasoning =
+              "After examining the corporate governance issues raised in this matter, the Court finds in favor of the petitioner. The evidence clearly establishes violations of the Companies Act provisions regarding directors' duties and shareholder rights. The respondents' actions concerning " +
+              getRandomEvidencePoint() +
+              " constitute oppression and mismanagement, and their business judgment defense regarding " +
+              getRandomDefenseArgument() +
+              " is not sustainable in light of the evidence presented.";
+            sentencing =
+              "The respondents are directed to buy out the petitioner's shares at fair market value as determined by an independent valuer. The respondents shall also pay costs of ₹5,00,000 to the petitioner.";
+          } else {
+            reasoning =
+              "After examining the corporate governance issues raised in this matter, the Court finds in favor of the respondents. The petitioner has failed to establish any violation of the Companies Act provisions or oppression and mismanagement. The respondents' business judgment regarding " +
+              getRandomDefenseArgument() +
+              " appears to have been exercised in good faith and in the best interest of the company. The petitioner's allegations concerning " +
+              getRandomEvidencePoint() +
+              " were not substantiated by sufficient evidence.";
+            sentencing = null;
+          }
+        } else {
+          // Default judgment for other case types
+          verdict = isGuilty
+            ? "In Favor of Plaintiff"
+            : "In Favor of Defendant";
+          reasoning =
+            "After careful consideration of all arguments and evidence presented by both sides, and applying the relevant legal principles and precedents, the court has reached its decision. The " +
+            (isGuilty ? "plaintiff's" : "defendant's") +
+            " arguments were found to be more compelling and legally sound.";
+          sentencing = isGuilty
+            ? "The defendant is directed to comply with the plaintiff's demands and pay the costs of the proceedings."
+            : null;
+        }
+
+        const judgmentResult = {
+          verdict: verdict,
+          reasoning: reasoning,
+          applicableLaws: legalReferences.slice(0, 3),
+          sentencing: sentencing,
+          postVerdictConsiderations:
+            postVerdictConsiderations ||
+            "The court recommends that both parties consider the option of appeal if they find this judgment unsatisfactory.",
+        };
+
+        setJudgment(judgmentResult);
+        setIsCaseActive(false);
+        setJudgmentInProgress(false);
+
+        // Add judgment to messages
+        const judgmentMessage: Message = {
+          id: "judgment-" + Date.now().toString(),
+          role: "judge",
+          content:
+            "**JUDGMENT**\n\n" +
+            judgmentResult.reasoning +
+            "\n\nVerdict: " +
+            judgmentResult.verdict +
+            "\n\n" +
+            (judgmentResult.sentencing
+              ? "Sentencing: " + judgmentResult.sentencing + "\n\n"
+              : "") +
+            "**Post-Verdict Considerations:**\n" +
+            judgmentResult.postVerdictConsiderations,
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, judgmentMessage]);
+      }, 5000);
+    }, 3000);
   };
 
-  // Helper function to calculate argument strength based on message content
+  // Helper function to calculate argument strength based on message content with adaptive weighting
   const calculateArgumentStrength = (messages: Message[]) => {
     let strength = 1; // Base strength
 
     for (const message of messages) {
       // Count citations
       if (message.citations && message.citations.length > 0) {
-        strength += message.citations.length * 2;
+        strength += message.citations.length * 2.5; // Increased weight for citations
       }
 
-      // Count evidence mentions
-      const evidenceTerms = [
+      // Adaptive evidence weighting - prioritize scientific and direct evidence
+      const directEvidenceTerms = [
+        "forensic",
+        "DNA",
+        "fingerprint",
+        "ballistic",
+        "medical report",
+        "expert opinion",
+        "CCTV",
+        "video",
+        "recording",
+        "photograph",
+        "eyewitness",
+      ];
+
+      const circumstantialEvidenceTerms = [
+        "circumstantial",
+        "inference",
+        "suggest",
+        "indicate",
+        "possibility",
+        "likely",
+        "probable",
+      ];
+
+      const generalEvidenceTerms = [
         "evidence",
         "exhibit",
         "witness",
@@ -898,11 +1191,29 @@ const VirtualCourtroom = ({
         "document",
         "proof",
         "record",
+        "confession",
+        "statement",
       ];
-      for (const term of evidenceTerms) {
+
+      // Higher weight for direct/scientific evidence
+      for (const term of directEvidenceTerms) {
         const regex = new RegExp(term, "gi");
         const matches = message.content.match(regex) || [];
-        strength += matches.length;
+        strength += matches.length * 2.5; // Higher weight for scientific evidence
+      }
+
+      // Lower weight for circumstantial evidence
+      for (const term of circumstantialEvidenceTerms) {
+        const regex = new RegExp(term, "gi");
+        const matches = message.content.match(regex) || [];
+        strength += matches.length * 0.8; // Lower weight for circumstantial evidence
+      }
+
+      // Standard weight for general evidence terms
+      for (const term of generalEvidenceTerms) {
+        const regex = new RegExp(term, "gi");
+        const matches = message.content.match(regex) || [];
+        strength += matches.length * 1.2;
       }
 
       // Count legal term mentions
@@ -914,6 +1225,18 @@ const VirtualCourtroom = ({
         "precedent",
         "judgment",
         "supreme court",
+        "beyond reasonable doubt",
+        "mens rea",
+        "actus reus",
+        "burden of proof",
+        "admissibility",
+        "direct evidence",
+        "hearsay",
+        "cross-examination",
+        "presumption of innocence",
+        "criminal intent",
+        "motive",
+        "alibi",
       ];
       for (const term of legalTerms) {
         const regex = new RegExp(term, "gi");
@@ -921,44 +1244,434 @@ const VirtualCourtroom = ({
         strength += matches.length * 1.5;
       }
 
-      // Count attachments
+      // Count specific IPC sections with higher weight for correct application
+      const ipcSectionRegex =
+        /section\s+(\d+[A-Za-z]*)\s+(?:of\s+)?(?:the\s+)?IPC/gi;
+      const ipcMatches = message.content.match(ipcSectionRegex) || [];
+
+      // Check for correct application of IPC sections
+      const content = message.content.toLowerCase();
+      if (
+        content.includes("murder") &&
+        ipcMatches.some((match) => match.includes("302"))
+      ) {
+        strength += 5; // Correct application of Section 302 for murder
+      }
+      if (
+        content.includes("culpable homicide") &&
+        ipcMatches.some((match) => match.includes("304"))
+      ) {
+        strength += 4; // Correct application of Section 304
+      }
+      if (
+        content.includes("rape") &&
+        ipcMatches.some((match) => match.includes("376"))
+      ) {
+        strength += 5; // Correct application of Section 376 for rape
+      }
+      if (
+        content.includes("theft") &&
+        ipcMatches.some((match) => match.includes("378"))
+      ) {
+        strength += 3; // Correct application of Section 378 for theft
+      }
+
+      // Penalize incorrect application of IPC sections
+      if (
+        content.includes("murder") &&
+        ipcMatches.some((match) => match.includes("420"))
+      ) {
+        strength -= 5; // Incorrect application of fraud section for murder
+      }
+      if (
+        content.includes("rape") &&
+        ipcMatches.some((match) => match.includes("302"))
+      ) {
+        strength -= 3; // Incorrect application of murder section for rape
+      }
+
+      // Count attachments with higher weight for relevant types
       if (message.attachments && message.attachments.length > 0) {
-        strength += message.attachments.length * 3;
+        message.attachments.forEach((attachment) => {
+          const fileName = attachment.name.toLowerCase();
+          // Higher weight for forensic reports and expert evidence
+          if (
+            fileName.includes("forensic") ||
+            fileName.includes("expert") ||
+            fileName.includes("report")
+          ) {
+            strength += 5;
+          }
+          // Higher weight for visual evidence
+          else if (
+            fileName.includes("photo") ||
+            fileName.includes("video") ||
+            attachment.type.startsWith("image/")
+          ) {
+            strength += 4;
+          }
+          // Standard weight for other attachments
+          else {
+            strength += 3;
+          }
+        });
+      }
+
+      // Expanded legal precedent integration - bonus for citing relevant case law
+      const recentCaseLawTerms = [
+        "Mukesh & Anr. v. State (NCT of Delhi) (2017)", // Delhi gang rape case
+        "K.S. Puttaswamy v. Union of India (2017)", // Privacy judgment
+        "Navtej Singh Johar v. Union of India (2018)", // Section 377 case
+        "Joseph Shine v. Union of India (2018)", // Adultery case
+        "Indian Young Lawyers Association v. State of Kerala (2018)", // Sabarimala case
+        "Tehseen Poonawalla v. Union of India (2018)", // Lynching case
+      ];
+
+      const classicCaseLawTerms = [
+        "Bachan Singh v. State of Punjab (1980)",
+        "Machhi Singh v. State of Punjab (1983)",
+        "Sharad Birdhichand Sarda v. State of Maharashtra (1984)",
+        "Kali Ram v. State of Himachal Pradesh (1973)",
+        "Tomaso Bruno v. State of U.P. (2015)",
+        "K. Venkateshwarlu v. State of Andhra Pradesh (2012)",
+        "Surendra Mishra v. State of Jharkhand (2011)",
+        "D.K. Basu v. State of West Bengal (1997)",
+      ];
+
+      // Higher weight for recent precedents
+      for (const term of recentCaseLawTerms) {
+        const regex = new RegExp(term, "gi");
+        const matches = message.content.match(regex) || [];
+        strength += matches.length * 5; // Higher weight for recent case law
+      }
+
+      // Standard weight for classic precedents
+      for (const term of classicCaseLawTerms) {
+        const regex = new RegExp(term, "gi");
+        const matches = message.content.match(regex) || [];
+        strength += matches.length * 4; // Standard weight for classic case law
+      }
+
+      // Adjust burden of proof based on case type and arguments
+      if (
+        content.includes("beyond reasonable doubt") &&
+        content.includes("criminal")
+      ) {
+        strength += 3; // Correctly applying criminal burden of proof
+      }
+      if (content.includes("preponderance") && content.includes("civil")) {
+        strength += 3; // Correctly applying civil burden of proof
       }
     }
 
     return strength;
   };
 
+  // Check if the argument needs clarification due to conflicting precedents or weak reasoning
+  const checkForClarificationNeeded = (
+    userMessage: Message,
+    allMessages: Message[],
+  ) => {
+    const content = userMessage.content.toLowerCase();
+
+    // Check for conflicting precedents
+    if (
+      content.includes("precedent") ||
+      content.includes("judgment") ||
+      content.includes("supreme court")
+    ) {
+      // Look for potentially conflicting precedents
+      const precedentMatches =
+        content.match(/([A-Za-z]+\s+v\.\s+[A-Za-z\s.]+)/gi) || [];
+
+      if (precedentMatches.length > 0) {
+        // Check if there are conflicting precedents in the conversation
+        const opposingMessages = allMessages.filter(
+          (m) => m.role !== userMessage.role,
+        );
+        const opposingContent = opposingMessages
+          .map((m) => m.content.toLowerCase())
+          .join(" ");
+
+        for (const precedent of precedentMatches) {
+          if (opposingContent.includes(precedent.toLowerCase())) {
+            return `The Court notes that both sides have cited the precedent of ${precedent}. However, there appears to be a disagreement about its interpretation or applicability to this case. Could the ${userMessage.role} please clarify how this precedent specifically supports your position, and address the opposing party's interpretation?`;
+          }
+        }
+      }
+    }
+
+    // Check for weak legal reasoning
+    if (
+      content.includes("therefore") ||
+      content.includes("thus") ||
+      content.includes("hence") ||
+      content.includes("conclude")
+    ) {
+      // Check if the conclusion is supported by specific legal provisions
+      if (
+        !content.includes("section") &&
+        !content.includes("article") &&
+        !content.includes("act")
+      ) {
+        return `The Court appreciates the ${userMessage.role}'s argument, but notes that your conclusion lacks specific reference to the relevant legal provisions. Could you please cite the specific sections of law that support your reasoning?`;
+      }
+    }
+
+    // Check for vague evidence claims
+    if (content.includes("evidence") || content.includes("proof")) {
+      if (
+        !content.includes("witness") &&
+        !content.includes("document") &&
+        !content.includes("exhibit") &&
+        !content.includes("forensic")
+      ) {
+        return `The ${userMessage.role} has made reference to evidence, but the Court requires more specificity. Please elaborate on the nature of this evidence, its source, and how it was collected and preserved.`;
+      }
+    }
+
+    // No clarification needed
+    return null;
+  };
+
+  // Helper functions for comprehensive judgment analysis
+  const getKeyArgumentPoints = (messages: Message[]) => {
+    if (messages.length === 0) return "No significant arguments presented.";
+
+    // Extract key points from messages
+    let points = "";
+    const keyMessages = messages.slice(-3); // Get the most recent messages
+
+    keyMessages.forEach((message, index) => {
+      // Extract a sentence or two from each message
+      const content = message.content;
+      const sentences = content
+        .split(/\.\s+/)
+        .filter((s) => s.length > 20)
+        .slice(0, 2);
+      if (sentences.length > 0) {
+        points += "- " + sentences.join(". ") + ".\n";
+      }
+    });
+
+    return points || "No substantive arguments identified.";
+  };
+
+  const checkForProceduralViolations = (messages: Message[]) => {
+    const violations = [];
+    const content = messages.map((m) => m.content.toLowerCase()).join(" ");
+
+    // Check for common procedural violations
+    if (
+      content.includes("confession") &&
+      content.includes("police") &&
+      content.includes("section 25")
+    ) {
+      violations.push(
+        "Potential inadmissibility of confession under Section 25 of the Indian Evidence Act",
+      );
+    }
+
+    if (
+      content.includes("chain of custody") ||
+      (content.includes("evidence") && content.includes("tamper"))
+    ) {
+      violations.push(
+        "Concerns regarding chain of custody of physical evidence",
+      );
+    }
+
+    if (
+      content.includes("electronic") &&
+      content.includes("section 65b") &&
+      (content.includes("certificate") || content.includes("authentication"))
+    ) {
+      violations.push(
+        "Issues with electronic evidence certification under Section 65B of the Indian Evidence Act",
+      );
+    }
+
+    if (
+      content.includes("arrest") &&
+      content.includes("procedure") &&
+      content.includes("d.k. basu")
+    ) {
+      violations.push(
+        "Potential violations of arrest procedures as per D.K. Basu guidelines",
+      );
+    }
+
+    return violations;
+  };
+
+  const identifyAggravatingFactors = (messages: Message[]) => {
+    const factors = [];
+    const content = messages.map((m) => m.content.toLowerCase()).join(" ");
+
+    // Check for common aggravating factors
+    if (
+      content.includes("premeditated") ||
+      content.includes("planned") ||
+      content.includes("premeditation")
+    ) {
+      factors.push("premeditation");
+    }
+
+    if (
+      content.includes("cruel") ||
+      content.includes("brutal") ||
+      content.includes("heinous")
+    ) {
+      factors.push("brutality of the crime");
+    }
+
+    if (
+      content.includes("prior conviction") ||
+      content.includes("criminal history") ||
+      content.includes("previous offense")
+    ) {
+      factors.push("prior criminal record");
+    }
+
+    if (
+      content.includes("vulnerable victim") ||
+      content.includes("child victim") ||
+      content.includes("elderly victim")
+    ) {
+      factors.push("vulnerability of the victim");
+    }
+
+    if (
+      content.includes("position of trust") ||
+      content.includes("authority") ||
+      content.includes("power")
+    ) {
+      factors.push("abuse of position of trust");
+    }
+
+    return factors.length > 0
+      ? factors
+      : ["nature and circumstances of the offense"];
+  };
+
+  const identifyMitigatingFactors = (messages: Message[]) => {
+    const factors = [];
+    const content = messages.map((m) => m.content.toLowerCase()).join(" ");
+
+    // Check for common mitigating factors
+    if (
+      content.includes("no prior") ||
+      content.includes("clean record") ||
+      content.includes("first offense")
+    ) {
+      factors.push("no prior criminal record");
+    }
+
+    if (
+      content.includes("provocation") ||
+      content.includes("heat of passion") ||
+      content.includes("sudden quarrel")
+    ) {
+      factors.push("provocation");
+    }
+
+    if (
+      content.includes("mental illness") ||
+      content.includes("psychiatric") ||
+      content.includes("psychological")
+    ) {
+      factors.push("mental health issues");
+    }
+
+    if (
+      content.includes("young") ||
+      content.includes("juvenile") ||
+      content.includes("immature")
+    ) {
+      factors.push("young age of the accused");
+    }
+
+    if (
+      content.includes("remorse") ||
+      content.includes("regret") ||
+      content.includes("apologized")
+    ) {
+      factors.push("genuine remorse");
+    }
+
+    return factors;
+  };
+
+  // Conduct bias and consistency check for the judgment
+  const conductBiasCheck = (messages: Message[]) => {
+    // Extract case details for consistency check
+    const caseDetails = {
+      type: caseType.toLowerCase(),
+      evidenceStrength: 0,
+      procedureViolations: checkForProceduralViolations(messages),
+      aggravatingFactors: identifyAggravatingFactors(messages),
+      mitigatingFactors: identifyMitigatingFactors(messages),
+    };
+
+    // Check for potential bias in similar case types
+    const similarCaseTypes = {
+      murder: ["homicide", "killing", "section 302"],
+      rape: ["sexual assault", "section 376"],
+      theft: ["robbery", "burglary", "section 378", "section 392"],
+    };
+
+    // Determine case category for consistency check
+    let caseCategory = "other";
+    for (const [category, keywords] of Object.entries(similarCaseTypes)) {
+      if (keywords.some((keyword) => caseDetails.type.includes(keyword))) {
+        caseCategory = category;
+        break;
+      }
+    }
+
+    // In a real implementation, this would check against a database of previous judgments
+    // For now, we'll just return a placeholder result
+    return {
+      biasDetected: false,
+      consistencyScore: 0.95, // High consistency score
+      caseCategory: caseCategory,
+    };
+  };
+
   // Helper functions to generate random evidence and defense points for judgment text
   const getRandomEvidencePoint = () => {
     const evidencePoints = [
-      "the documentary evidence",
-      "the witness testimonies",
-      "the forensic analysis",
-      "the expert opinions",
-      "the circumstantial evidence",
-      "the financial records",
-      "the surveillance footage",
-      "the authenticated communications",
-      "the medical reports",
-      "the official records",
+      "the documentary evidence which has been properly authenticated as per Section 65B of the Indian Evidence Act",
+      "the consistent and credible witness testimonies which have withstood rigorous cross-examination",
+      "the forensic analysis conducted by qualified experts in accordance with Section 45 of the Indian Evidence Act",
+      "the expert opinions which satisfy the requirements of scientific validity and reliability",
+      "the circumstantial evidence which forms a complete chain without gaps as required by the Supreme Court in Sharad Birdhichand Sarda v. State of Maharashtra",
+      "the financial records which have been verified and authenticated by competent authorities",
+      "the surveillance footage which has been properly preserved and authenticated in accordance with Section 65B of the Indian Evidence Act",
+      "the authenticated communications which have been recovered and verified following proper legal procedures",
+      "the medical reports prepared by qualified medical professionals in accordance with Section 45 of the Indian Evidence Act",
+      "the official records maintained by public servants in the discharge of their official duties as per Section 35 of the Indian Evidence Act",
+      "the DNA evidence which has been collected, preserved, and analyzed following scientific protocols and legal procedures",
+      "the ballistic reports which establish a conclusive link between the recovered weapon and the crime",
     ];
     return evidencePoints[Math.floor(Math.random() * evidencePoints.length)];
   };
 
   const getRandomDefenseArgument = () => {
     const defenseArguments = [
-      "procedural irregularities",
-      "lack of mens rea",
-      "absence of direct evidence",
-      "alternative explanations",
-      "witness credibility issues",
-      "chain of custody concerns",
-      "statutory interpretation",
-      "jurisdictional challenges",
-      "constitutional protections",
-      "precedential inconsistencies",
+      "procedural irregularities in the investigation which violate the guidelines established in D.K. Basu v. State of West Bengal",
+      "lack of mens rea (criminal intent) which is an essential element for the offense as established in Babu v. State of Kerala",
+      "absence of direct evidence linking the accused to the crime, with the circumstantial evidence being insufficient to form a complete chain",
+      "alternative explanations for the evidence which create reasonable doubt as to the accused's guilt",
+      "witness credibility issues including contradictions and improvements in testimony as highlighted in Vadivelu Thevar v. State of Madras",
+      "chain of custody concerns regarding key evidence which raise doubts about its integrity and reliability",
+      "statutory interpretation of the relevant provisions which do not support the prosecution's case",
+      "jurisdictional challenges which affect the validity of the proceedings",
+      "constitutional protections under Articles 20 and 21 which have been violated during the investigation",
+      "precedential inconsistencies with established Supreme Court judgments on similar factual matrices",
+      "inadmissibility of the confession under Section 25 of the Indian Evidence Act as it was made to a police officer",
+      "violation of the accused's right against self-incrimination protected under Article 20(3) of the Constitution",
+      "failure to conduct proper identification proceedings as required by the Supreme Court in Sidhartha Vashisht v. State (NCT of Delhi)",
     ];
     return defenseArguments[
       Math.floor(Math.random() * defenseArguments.length)
