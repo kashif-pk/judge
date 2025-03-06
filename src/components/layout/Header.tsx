@@ -83,10 +83,10 @@ const Header = ({
             <Button
               variant="outline"
               size="sm"
-              className="border-navy-500 text-navy-500 hover:bg-navy-500 hover:text-white"
+              className="border-navy-500 hover:bg-navy-700"
               onClick={() => (window.location.href = "/courtroom")}
             >
-              Virtual Courtroom
+              <span className="text-white">Virtual Courtroom</span>
             </Button>
           </div>
 

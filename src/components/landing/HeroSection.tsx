@@ -40,18 +40,18 @@ const HeroSection = ({
               <Button
                 onClick={onStartCase}
                 size="lg"
-                className="bg-gold-500 hover:bg-gold-600 text-navy-900 font-medium px-8 py-3 rounded-md transition-all duration-200 text-base"
+                className="bg-gold-500 hover:bg-gold-600 font-medium px-8 py-3 rounded-md transition-all duration-200 text-base"
               >
-                Enter Virtual Courtroom
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <span className="text-navy-900">Enter Virtual Courtroom</span>
+                <ArrowRight className="ml-2 h-5 w-5 text-navy-900" />
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                className="border-white/30 text-white hover:bg-white/10 hover:text-white px-8 py-3 rounded-md transition-all duration-200 text-base"
+                className="border-white/30 hover:bg-white/10 px-8 py-3 rounded-md transition-all duration-200 text-base"
                 onClick={() => (window.location.href = "/how-it-works")}
               >
-                How It Works
+                <span className="text-white">How It Works</span>
               </Button>
             </div>
 

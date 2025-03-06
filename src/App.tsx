@@ -7,6 +7,14 @@ const VirtualCourtroomPage = lazy(
   () => import("./components/courtroom/VirtualCourtroomPage"),
 );
 
+const AboutPage = lazy(() => import("./components/about/AboutPage"));
+
+const HowItWorksPage = lazy(
+  () => import("./components/how-it-works/HowItWorksPage"),
+);
+
+const FAQPage = lazy(() => import("./components/faq/FAQPage"));
+
 function App() {
   return (
     <Suspense fallback={<p>Loading...</p>}>
@@ -14,6 +22,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/courtroom" element={<VirtualCourtroomPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/faq" element={<FAQPage />} />
           {import.meta.env.VITE_TEMPO === "true" && (
             <Route path="/tempobook/*" element={<div />} />
           )}
